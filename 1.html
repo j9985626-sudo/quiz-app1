@@ -1,0 +1,139 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>智學測驗系統 | 自訂題庫 + 錯題分析</title>
+    <link rel="stylesheet" href="3.css">
+</head>
+<body>
+
+    <!-- 導航按鈕組 (切換三大模塊) -->
+    <div class="nav-tabs">
+        <button class="nav-btn active" data-tab="manager">📚 題庫管理</button>
+        <button class="nav-btn" data-tab="exam">✍️ 測驗模式</button>
+        <button class="nav-btn" data-tab="review">📊 錯題 / 不熟題庫</button>
+    </div>
+
+    <!-- ======================= 區塊1：題庫管理 ======================= -->
+    <section id="managerSection" class="section-container active-section">
+        <div class="card">
+            <h2>✏️ 新增題目</h2>
+            <div class="form-group">
+                <label>題目內容</label>
+                <input type="text" id="newQuestionText" placeholder="請輸入題目說明...">
+            </div>
+            <div class="form-group">
+                <label>題型</label>
+                <select id="newQuestionType">
+                    <option value="single">單選題 (單一正確答案)</option>
+                    <option value="multi">複選題 (多個正確答案)</option>
+                    <option value="true_false">是非題 (True/False)</option>
+                    <option value="matching">配對題 (左側案例→右側框)</option>
+                </select>
+            </div>
+            <div class="form-group" id="optionsContainer">
+                <label>選項 / 配對設定</label>
+                <div id="dynamicOptions">
+                    <!-- 動態產生 UI -->
+                </div>
+                <button type="button" id="addOptionBtn" class="small-btn" style="display:none;">+ 增加選項</button>
+            </div>
+            <div class="form-group">
+                <label>正確答案</label>
+                <input type="text" id="newAnswer" placeholder="請選擇正確答案" readonly>
+            </div>
+            <button id="saveQuestionBtn" class="btn-primary">📌 儲存題目</button>
+        </div>
+
+        <div class="card">
+            <h2>📖 題庫列表</h2>
+            <div id="questionBankList" class="question-list">
+                <!-- 動態渲染題庫 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================= 區塊2：測驗模式 ======================= -->
+    <section id="examSection" class="section-container">
+        <div class="card" id="examSetupPanel">
+            <h2>🎯 測驗設定</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>題數</label>
+                    <select id="quizLimit">
+                        <option value="5">5 題</option>
+                        <option value="10" selected>10 題</option>
+                        <option value="20">20 題</option>
+                        <option value="50">50 題</option>
+                        <option value="100">100 題</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>題庫來源</label>
+                    <select id="quizSource">
+                        <option value="all">📚 全部題庫</option>
+                        <option value="wrong">❌ 錯題本</option>
+                        <option value="weak">⚠️ 不熟題本</option>
+                        <option value="single">📝 全部選擇題 (單選+複選)</option>
+                        <option value="true_false">✅ 全部是非題</option>
+                        <option value="matching">🔗 全部配對題</option>
+                    </select>
+                </div>
+            </div>
+            <button id="startExamBtn" class="btn-primary">🚀 開始測驗</button>
+        </div>
+
+        <!-- 測驗進行中畫面 -->
+        <div id="examActivePanel" style="display: none;">
+            <div class="card">
+                <div class="quiz-header">
+                    <span>第 <span id="currentQIndex">1</span> / <span id="totalQCount">0</span> 題</span>
+                    <span class="timer-badge">⏱️ 思考中...</span>
+                </div>
+                <div id="questionDisplay" class="question-text">題目載入中</div>
+                <div id="optionsArea" class="options-area">
+                    <!-- 選項按鈕動態產生 -->
+                </div>
+                <div class="feedback-area" id="feedbackMsg"></div>
+                <button id="nextQuestionBtn" class="btn-next" disabled>➡️ 下一題</button>
+                <div class="keyboard-hint" id="keyboardHint">💡 快捷鍵: 1 2 3 4 直接選擇答案</div>
+            </div>
+        </div>
+
+        <!-- 測驗結果畫面 -->
+        <div id="examResultPanel" style="display: none;">
+            <div class="card result-card">
+                <h2>📋 測驗結果</h2>
+                <div class="result-stats">
+                    <p>總題數: <span id="resultTotal">0</span></p>
+                    <p>正確題數: <span id="resultCorrect">0</span></p>
+                    <p>正確率: <span id="resultPercent">0</span>%</p>
+                    <p>平均作答時間: <span id="avgTime">0.0</span> 秒 / 題</p>
+                </div>
+                <h3>❌ 本次錯題列表</h3>
+                <ul id="resultWrongList" class="wrong-list"></ul>
+                <button id="backToSetupBtn" class="btn-secondary">🔄 返回設定</button>
+                <button id="retrySameExamBtn" class="btn-primary">🔁 再測一次</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================= 區塊3：錯題 & 不熟題庫 ======================= -->
+    <section id="reviewSection" class="section-container">
+        <div class="card">
+            <h2>❌ 錯題本 <span class="badge-count" id="wrongCountBadge">0</span></h2>
+            <button id="practiceWrongBtn" class="small-practice-btn">📖 練習全部錯題</button>
+            <div id="wrongQuestionsList" class="review-list"></div>
+        </div>
+        <div class="card">
+            <h2>⚠️ 不熟題本 (答題 >4秒) <span class="badge-count" id="weakCountBadge">0</span></h2>
+            <button id="practiceWeakBtn" class="small-practice-btn">📖 練習不熟題</button>
+            <div id="weakQuestionsList" class="review-list"></div>
+        </div>
+    </section>
+
+    <script src="2.js"></script>
+</body>
+</html>
